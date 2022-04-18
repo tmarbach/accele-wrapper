@@ -7,10 +7,10 @@ import numpy as np
 import argparse
 import csv
 import os
-from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
+from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN, RandomUnderSampler
 
 #FOR ACCELERATER
-#TODO: add flag for wild data X
+#TODO: 
     # script checks for flag before processing the input file, checks input file format
     # if dir then concats all files or just processes one at a time
     # cleans by checking that xyz columns have no missing values X
@@ -36,9 +36,9 @@ def arguments():
             action="store_true"
             )
     parser.add_argument(
-            "-o",
-            "--oversample",
-            help = "Flag to oversample the minority classes: o -- oversample, s -- SMOTE, or a -- ADASYN ",
+            "-s",
+            "--sampling",
+            help = "Flag to over or undersample the minority classes: u -- undersample,  o -- oversample, s -- SMOTE, or a -- ADASYN ",
             default=False, 
             type=str 
             )
@@ -280,7 +280,7 @@ def accel_singlelabel_xy(windows):
 
 
 
-def accel_oversampler(Xdata,ydata, sampler_flag = False):
+def accel_sampler(Xdata,ydata, sampler_flag = False):
     """
     Reduces the dimensions of inout data, splits into train/test set,
     then randomly oversamples the minority classes to match the majority class"""
@@ -293,12 +293,14 @@ def accel_oversampler(Xdata,ydata, sampler_flag = False):
         X_resampled, y_resampled = SMOTE(k_neighbors=2).fit_resample(Xdata2d, ydata)
     elif sampler_flag == 'a':
         X_resampled, y_resampled = ADASYN(n_neighbors=2).fit_resample(Xdata2d, ydata)
+    elif sampler_flag == 'u':
+        X_resampled, y_resampled = RandomUnderSampler(random_state=0).fit_resample(Xdata2d, ydata)
     else:
         X_resampled, y_resampled = Xdata2d, ydata
 
     tupdata = zip(X_resampled,y_resampled)
-    total_oversample_data = [list(elem) for elem in tupdata]
-    clean_data = [np.append(sample[0], sample[1]) for sample in total_oversample_data]
+    total_sample_data = [list(elem) for elem in tupdata]
+    clean_data = [np.append(sample[0], sample[1]) for sample in total_sample_data]
 
     print("windows flattened and labeled")
     return clean_data
@@ -345,9 +347,9 @@ def main():
         classdict, coilist = class_identifier(df, args.classes_of_interest) # for indentifying missing classes
         windows, all_classes = singleclass_leaping_window_exclusive(df, int(args.window_size), args.classes_of_interest)
         Xdata, ydata = accel_singlelabel_xy(windows)
-        total_data = accel_oversampler(Xdata, ydata, args.oversample)      
+        total_data = accel_sampler(Xdata, ydata, args.sampling)      
 
-        output_data(total_data, args.window_size, args.classes_of_interest, args.oversample, args.acceleRater_data_output_file)
+        output_data(total_data, args.window_size, args.classes_of_interest, args.sampling, args.acceleRater_data_output_file)
     
 
 
