@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-#Hi Ryan!!!
 
 
 import pandas as pd
