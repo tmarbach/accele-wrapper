@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-
-from distutils.command.clean import clean
 import pandas as pd
 import numpy as np
 import argparse
 import csv
 import os
-from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
-from imblearn.under_sampling import RandomUnderSampler
+
+
 
 #FOR ACCELERATER
 #TODO: 
@@ -35,13 +33,6 @@ def arguments():
             "--wild-data",
             help="Process wild data for use after the model is train. No behaviors in the input. must be .xlsx file",
             action="store_true"
-            )
-    parser.add_argument(
-            "-s",
-            "--sampling",
-            help = "Flag to over or undersample the minority classes: u -- undersample,  o -- oversample, s -- SMOTE, or a -- ADASYN ",
-            default=False, 
-            type=str 
             )
     parser.add_argument(
             "-w",
@@ -280,26 +271,10 @@ def accel_singlelabel_xy(windows):
     return np.stack(Xdata), np.asarray(ydata)
 
 
-
-def accel_sampler(Xdata,ydata, sampler_flag = False):
-    """
-    Reduces the dimensions of inout data, splits into train/test set,
-    then randomly oversamples the minority classes to match the majority class"""
+def accel_window_flattener(Xdata,ydata):
     nsamples, nx, ny = Xdata.shape
     Xdata2d = Xdata.reshape((nsamples,nx*ny))
-    if sampler_flag == 'o':
-        ros = RandomOverSampler(random_state=0)
-        X_resampled, y_resampled = ros.fit_resample(Xdata2d, ydata)
-    elif sampler_flag == 's':
-        X_resampled, y_resampled = SMOTE(k_neighbors=2).fit_resample(Xdata2d, ydata)
-    elif sampler_flag == 'a':
-        X_resampled, y_resampled = ADASYN(n_neighbors=2).fit_resample(Xdata2d, ydata)
-    elif sampler_flag == 'u':
-        X_resampled, y_resampled = RandomUnderSampler(random_state=0).fit_resample(Xdata2d, ydata)
-    else:
-        X_resampled, y_resampled = Xdata2d, ydata
-
-    tupdata = zip(X_resampled,y_resampled)
+    tupdata = zip(Xdata2d,ydata)
     total_sample_data = [list(elem) for elem in tupdata]
     clean_data = [np.append(sample[0], sample[1]) for sample in total_sample_data]
 
@@ -307,20 +282,15 @@ def accel_sampler(Xdata,ydata, sampler_flag = False):
     return clean_data
 
 
-
-def output_data(totaldata, windowsize, coi = False, oversampling = False, output_filename = False):
+def output_data(totaldata, windowsize, coi = False, output_filename = False):
     if coi:
         coi_label = str(coi)
     coi_label = 'all_classes'
     label = coi_label + str(windowsize) + "_acceleRater.csv"
-    if output_filename == False and oversampling == False:
+    if output_filename == False:
         with open(label, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(totaldata) 
-    elif output_filename == False and oversampling == True:
-        with open(str(oversampling) + '_' + label, "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerows(totaldata)
     else:
         with open(output_filename, "w", newline="") as f:
             writer = csv.writer(f)
@@ -348,7 +318,7 @@ def main():
         classdict, coilist = class_identifier(df, args.classes_of_interest) # for indentifying missing classes
         windows, all_classes = singleclass_leaping_window_exclusive(df, int(args.window_size), args.classes_of_interest)
         Xdata, ydata = accel_singlelabel_xy(windows)
-        total_data = accel_sampler(Xdata, ydata, args.sampling)      
+        total_data = accel_window_flattener(Xdata, ydata)      
 
         output_data(total_data, args.window_size, args.classes_of_interest, args.sampling, args.acceleRater_data_output_file)
     

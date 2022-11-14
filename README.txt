@@ -9,4 +9,5 @@ Input csv/xlsx requirements:
 	 4 columns labeled: Behavior, accX, accY, accZ
 	rows with missing values in any of the four columns will be ignored. 
 
-If using the -r (wild-data) flag the file must be in .xlsx format
+The classes h, m, and f are automatically converted to the strike class (t)
+If using the -r (wild-data) flag the file must be in .xlsx or .csv format
