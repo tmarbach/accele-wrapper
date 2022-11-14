@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+#Hi Ryan!!!
+
 
 import pandas as pd
 import numpy as np
 import argparse
 import csv
 import os
-
 
 
 #FOR ACCELERATER
@@ -31,7 +32,8 @@ def arguments():
     parser.add_argument(
             "-r",
             "--wild-data",
-            help="Process wild data for use after the model is train. No behaviors in the input. must be .xlsx file",
+            help="Process wild data for use after the model is train. No behaviors in the input. must be .xlsx or .csv file",
+            default=False,
             action="store_true"
             )
     parser.add_argument(
@@ -320,7 +322,7 @@ def main():
         Xdata, ydata = accel_singlelabel_xy(windows)
         total_data = accel_window_flattener(Xdata, ydata)      
 
-        output_data(total_data, args.window_size, args.classes_of_interest, args.sampling, args.acceleRater_data_output_file)
+        output_data(total_data, args.window_size, args.classes_of_interest, args.acceleRater_data_output_file)
     
 
 
