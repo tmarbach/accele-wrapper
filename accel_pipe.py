@@ -7,7 +7,8 @@ import numpy as np
 import argparse
 import csv
 import os
-from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN, RandomUnderSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
+from imblearn.under_sampling import RandomUnderSampler
 
 #FOR ACCELERATER
 #TODO: 
@@ -32,7 +33,7 @@ def arguments():
     parser.add_argument(
             "-r",
             "--wild-data",
-            help="Process wild data for use after the model is train. No behaviors in the input",
+            help="Process wild data for use after the model is train. No behaviors in the input. must be .xlsx file",
             action="store_true"
             )
     parser.add_argument(
