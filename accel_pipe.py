@@ -82,19 +82,11 @@ def accel_data_csv_cleaner(accel_data_csv):
     
     return df
 
-# def accel_data_dir_cleaner(accel_data_csv):
-#     #TODO: allow for xlsx files
-#     files = [f for f in os.listdir(accel_data_csv) if f.endswith('.csv')]
-#     fulldf = []
-#     for csv in files:
-#         df = accel_data_csv_cleaner(csv)
-#         fulldf.append(df)
-#     alldf = pd.concat(fulldf)
-#     return alldf
 
 
 def accel_data_dir_cleaner(accel_data_csv):
     #TODO: allow for xlsx files
+    
     files = [f for f in os.listdir(accel_data_csv) if f.endswith('.csv')]
     fulldf = []
     for csv in files:
@@ -117,6 +109,7 @@ def accel_data_dir_cleaner(accel_data_csv):
     df = df[[c for c in cols_at_front if c in df]+
             [c for c in df if c not in cols_at_front]]
     df= df.dropna(subset=['Behavior'])
+    df = df.loc[df['Behavior'].str.lower()]
     df = df.loc[df['Behavior'] != 'n']
     return df
 
@@ -260,13 +253,10 @@ def accel_singlelabel_xy(windows):
         ydata -- integer class labels for each window
     """
     positions = ['accX', 'accY', 'accZ']
-    strikes = ['h', 'm', 'f']
     Xdata, ydata = [], []
 
     for window in windows:
         behavior = window['Behavior'].iloc[0]
-        if behavior in strikes:
-            behavior  = 't'
         Xdata.append(window[positions].to_numpy())
         ydata.append(behavior)
     return np.stack(Xdata), np.asarray(ydata)
